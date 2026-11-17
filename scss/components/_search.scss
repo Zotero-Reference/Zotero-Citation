@@ -1,0 +1,177 @@
+.search {
+	position: relative;
+	min-width: 40px;
+	height: 36px;
+
+	input {
+		background-color: var(--material-background);
+		border-radius: 5px;
+		// Overwrite input style on Windows
+		border: var(--material-border-quinary) !important;
+		color: var(--fill-primary);
+		flex: 1 0;
+		margin: 6px 0px;
+		min-width: 40px;
+		padding: 3px 7px;
+	
+		&::placeholder {
+			color: var(--fill-tertiary);
+			opacity: 1.0;
+		}
+	
+		@media not (-moz-platform: windows) {
+			@include focus-ring;
+		}
+
+		// We draw our own clear button below
+		&::-moz-search-clear-button {
+			display: none;
+		}
+	}
+
+	.search-cancel-button {
+		position: absolute;
+		inset-inline-end: 0;
+		width: 14px;
+		height: 14px;
+		align-self: center;
+		margin-inline-end: 6px;
+		@media (-moz-platform: windows) {
+			margin-top: 2px;
+		}
+		cursor: default;
+		background: url(resource://content-accessible/close-12.svg) no-repeat center/contain;
+		background-size: unset;
+		-moz-context-properties: fill;
+		fill: var(--fill-primary);
+	}
+}
+
+// Firefox gives the native clear button a hover background that runs into the field's focus ring,
+// and we don't use hover effects on comparable buttons
+input::-moz-search-clear-button {
+	&:hover,
+	&:active {
+		background-color: transparent;
+	}
+}
+
+// The list of completions for what's being typed in a query (see
+// queryTextbox.js)
+.query-completions {
+	--panel-padding: 4px 0;
+
+	richlistbox {
+		appearance: none;
+		background: transparent;
+		border: none;
+		margin: 0;
+		padding: 0;
+		min-width: 16em;
+		// Long lists scroll rather than being cut off
+		max-height: 20em;
+	}
+
+	richlistitem {
+		// A row is the name and, at the far end, what it searches, each as wide
+		// as its text, so the popup is as wide as its widest row
+		display: grid;
+		grid-template-columns: auto auto;
+		justify-content: space-between;
+		gap: 24px;
+		padding: 3px 8px;
+
+		> * {
+			overflow: visible;
+			text-overflow: clip;
+			white-space: nowrap;
+			width: auto;
+		}
+
+		&:hover {
+			background-color: var(--fill-quinary);
+		}
+
+		// Focus stays in the search field while the list is open, so the
+		// selected row is the active one
+		&[selected] {
+			background-color: var(--color-accent);
+			color: var(--color-accent-text);
+
+			.completion-description {
+				color: inherit;
+				opacity: 0.8;
+			}
+
+			// A ring in the text color, so the swatch reads on the accent
+			// background whatever colors the two are
+			.completion-swatch {
+				box-shadow: 0 0 0 1px var(--color-accent-text);
+			}
+		}
+	}
+
+	.completion-label {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+
+		// Colored values read as they do in the tag selector
+		&.colored {
+			font-weight: 600;
+		}
+	}
+
+	.completion-swatch {
+		flex: 0 0 auto;
+		width: 10px;
+		height: 10px;
+		border-radius: 50%;
+		box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+	}
+
+	.completion-description {
+		color: var(--fill-secondary);
+	}
+}
+
+search-textbox,
+query-textbox {
+	appearance: none;
+	background: var(--material-background);
+	border-radius: 5px;
+	border: var(--material-border-quinary);
+	color: var(--fill-primary);
+	padding: 0;
+	padding-inline-end: 6px;
+	text-shadow: none;
+	// Allow text selection in the field instead of dragging the window when the
+	// field is in a draggable toolbar
+	-moz-window-dragging: no-drag;
+
+	&::placeholder {
+		color: var(--fill-tertiary);
+		opacity: 1.0;
+	}
+
+	@media not (-moz-platform: windows) {
+		@include focus-ring(false, ":focus");
+	}
+}
+
+:is(search-textbox, query-textbox)::part(search-sign),
+:is(search-textbox, query-textbox)::part(search-icon) {
+	@include svgicon-menu("magnifier", "universal", "16");
+	color: var(--fill-secondary);
+	// right: 2px padding + 8px dropmarker width + 4px padding + 6px padding
+	// Use explicit left/right padding here because this element is flipped in RTL (see below)
+	padding: 6px 4px 6px 6px;
+	margin: 0px;
+	width: auto; // override fx115 default width
+	display: block; // override fx115 display:none on macOS
+}
+
+:is(search-textbox, query-textbox):-moz-locale-dir(rtl)::part(search-sign),
+:is(search-textbox, query-textbox):-moz-locale-dir(rtl)::part(search-icon) {
+	transform: scaleX(-1);
+}
